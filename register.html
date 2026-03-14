@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Create Account — Virtual Laboratory Hub</title>
+    <link rel="stylesheet" href="auth-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="hidden">
+        <div class="loader-content">
+            <div class="loader-spinner">
+                <svg viewBox="0 0 50 50" class="spinner-svg">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e0e7ef" stroke-width="4"></circle>
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#27ae60" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" class="spinner-circle"></circle>
+                </svg>
+            </div>
+            <h1>Creating Account...</h1>
+            <p>Setting up your laboratory profile...</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="auth-container register-container">
+        <!-- Background Elements -->
+        <div class="auth-background">
+            <div class="bg-shape bg-shape-1"></div>
+            <div class="bg-shape bg-shape-2"></div>
+            <div class="bg-shape bg-shape-3"></div>
+        </div>
+
+        <!-- Authentication Card -->
+        <div class="auth-card register-card">
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h1>Join the Laboratory</h1>
+                <p>Create your account to start your biomedical engineering journey</p>
+            </div>
+
+            <!-- Registration Form -->
+            <form id="register-form" class="auth-form">
+                <!-- Step Indicator -->
+                <div class="form-steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Personal</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Academic</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Preferences</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" id="step-1">
+                    <h3>Personal Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">
+                                <i class="fas fa-user"></i>
+                                First Name
+                            </label>
+                            <input 
+                                type="text" 
+                                id="first-name" 
+                                name="firstName" 
+                                required 
+                                placeholder="Enter your first name"
+                                autocomplete="given-name"
+                            >
+                            <span class="field-error" id="first-name-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last-name">
+                                <i class="fas fa-user"></i>
+                                Last Name
+                            </label>
+                            <input 
+                                type="text" 
+                                id="last-name" 
+                                name="lastName" 
+                                required 
+                                placeholder="Enter your last name"
+                                autocomplete="family-name"
+                            >
+                            <span class="field-error" id="last-name-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email-register">
+                            <i class="fas fa-envelope"></i>
+                            Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email-register" 
+                            name="email" 
+                            required 
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                        >
+                        <span class="field-error" id="email-register-error"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password-register">
+                                <i class="fas fa-lock"></i>
+                                Password
+                            </label>
+                            <div class="password-input">
+                                <input 
+                                    type="password" 
+                                    id="password-register" 
+                                    name="password" 
+                                    required 
+                                    placeholder="Create a strong password"
+                                    autocomplete="new-password"
+                                >
+                                <button type="button" class="password-toggle" onclick="togglePassword('password-register')">
+                                    <i class="fas fa-eye" id="password-register-toggle-icon"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="password-strength"></div>
+                            <span class="field-error" id="password-register-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-password">
+                                <i class="fas fa-lock"></i>
+                                Confirm Password
+                            </label>
+                            <div class="password-input">
+                                <input 
+                                    type="password" 
+                                    id="confirm-password" 
+                                    name="confirmPassword" 
+                                    required 
+                                    placeholder="Confirm your password"
+                                    autocomplete="new-password"
+                                >
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirm-password')">
+                                    <i class="fas fa-eye" id="confirm-password-toggle-icon"></i>
+                                </button>
+                            </div>
+                            <span class="field-error" id="confirm-password-error"></span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="auth-btn primary" onclick="nextStep()">
+                        Continue to Academic Info
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Step 2: Academic Information -->
+                <div class="form-step" id="step-2">
+                    <h3>Academic Background</h3>
+                    
+                    <div class="form-group">
+                        <label for="institution">
+                            <i class="fas fa-university"></i>
+                            Institution / University
+                        </label>
+                        <input 
+                            type="text" 
+                            id="institution" 
+                            name="institution" 
+                            required 
+                            placeholder="Enter your institution name"
+                        >
+                        <span class="field-error" id="institution-error"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="program-level">
+                                <i class="fas fa-graduation-cap"></i>
+                                Program Level
+                            </label>
+                            <select id="program-level" name="programLevel" required>
+                                <option value="">Select your level</option>
+                                <option value="undergraduate">Undergraduate</option>
+                                <option value="graduate">Graduate (Master's)</option>
+                                <option value="doctoral">Doctoral (PhD)</option>
+                                <option value="professional">Professional/Continuing Ed</option>
+                                <option value="faculty">Faculty/Instructor</option>
+                                <option value="researcher">Researcher</option>
+                            </select>
+                            <span class="field-error" id="program-level-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="year-of-study">
+                                <i class="fas fa-calendar"></i>
+                                Year of Study
+                            </label>
+                            <select id="year-of-study" name="yearOfStudy">
+                                <option value="">Select year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                                <option value="5+">5th Year+</option>
+                                <option value="na">Not Applicable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field-of-study">
+                            <i class="fas fa-flask"></i>
+                            Field of Study
+                        </label>
+                        <select id="field-of-study" name="fieldOfStudy" required>
+                            <option value="">Select your field</option>
+                            <option value="biomedical-engineering">Biomedical Engineering</option>
+                            <option value="electrical-engineering">Electrical Engineering</option>
+                            <option value="mechanical-engineering">Mechanical Engineering</option>
+                            <option value="computer-science">Computer Science</option>
+                            <option value="biology">Biology/Life Sciences</option>
+                            <option value="medicine">Medicine</option>
+                            <option value="nursing">Nursing</option>
+                            <option value="physics">Physics</option>
+                            <option value="chemistry">Chemistry</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <span class="field-error" id="field-of-study-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lab-experience">
+                            <i class="fas fa-microscope"></i>
+                            Previous Laboratory Experience
+                        </label>
+                        <select id="lab-experience" name="labExperience" required>
+                            <option value="">Select your experience level</option>
+                            <option value="none">No prior experience</option>
+                            <option value="basic">Basic (1-2 courses)</option>
+                            <option value="intermediate">Intermediate (3-5 courses)</option>
+                            <option value="advanced">Advanced (6+ courses)</option>
+                            <option value="professional">Professional/Research</option>
+                        </select>
+                        <span class="field-error" id="lab-experience-error"></span>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="auth-btn secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="button" class="auth-btn primary" onclick="nextStep()">
+                            Continue to Preferences
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Learning Preferences -->
+                <div class="form-step" id="step-3">
+                    <h3>Learning Preferences</h3>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-bullseye"></i>
+                            Learning Goals (select all that apply)
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="learningGoals" value="signal-processing">
+                                <span class="checkmark"></span>
+                                Master signal processing techniques
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="learningGoals" value="data-analysis">
+                                <span class="checkmark"></span>
+                                Learn data analysis methods
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="learningGoals" value="lab-techniques">
+                                <span class="checkmark"></span>
+                                Understand laboratory techniques
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="learningGoals" value="clinical-applications">
+                                <span class="checkmark"></span>
+                                Explore clinical applications
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="learningGoals" value="research-skills">
+                                <span class="checkmark"></span>
+                                Develop research skills
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" name="learningGoals" value="certification-prep">
+                                <span class="checkmark"></span>
+                                Prepare for certification
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-heart"></i>
+                            Areas of Interest (select up to 3)
+                        </label>
+                        <div class="interest-tags">
+                            <label class="tag-item">
+                                <input type="checkbox" name="interests" value="cardiology">
+                                <span class="tag-label">Cardiology</span>
+                            </label>
+                            <label class="tag-item">
+                                <input type="checkbox" name="interests" value="neurology">
+                                <span class="tag-label">Neurology</span>
+                            </label>
+                            <label class="tag-item">
+                                <input type="checkbox" name="interests" value="biomechanics">
+                                <span class="tag-label">Biomechanics</span>
+                            </label>
+                            <label class="tag-item">
+                                <input type="checkbox" name="interests" value="imaging">
+                                <span class="tag-label">Medical Imaging</span>
+                            </label>
+                            <label class="tag-item">
+                                <input type="checkbox" name="interests" value="rehabilitation">
+                                <span class="tag-label">Rehabilitation</span>
+                            </label>
+                            <label class="tag-item">
+                                <input type="checkbox" name="interests" value="prosthetics">
+                                <span class="tag-label">Prosthetics</span>
+                            </label>
+                        </div>
+                        <small class="form-hint">Select up to 3 areas that interest you most</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="learning-pace">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Preferred Learning Pace
+                        </label>
+                        <select id="learning-pace" name="learningPace" required>
+                            <option value="">Select your preference</option>
+                            <option value="self-paced">Self-paced (flexible timeline)</option>
+                            <option value="structured">Structured (regular schedule)</option>
+                            <option value="intensive">Intensive (accelerated learning)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="terms-agreement" name="terms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#" onclick="showTerms()">Terms of Service</a> and <a href="#" onclick="showPrivacy()">Privacy Policy</a>
+                        </label>
+                        <span class="field-error" id="terms-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="notifications" name="notifications">
+                            <span class="checkmark"></span>
+                            Send me updates about new experiments and features
+                        </label>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="auth-btn secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <button type="submit" class="auth-btn primary" id="register-btn">
+                            <i class="fas fa-user-plus"></i>
+                            Create Laboratory Account
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p>
+                    Already have an account? 
+                    <a href="login.html" class="auth-link">Sign In</a>
+                </p>
+                <div class="auth-links">
+                    <a href="#" onclick="showHelp()">
+                        <i class="fas fa-question-circle"></i>
+                        Need Help?
+                    </a>
+                    <a href="#" onclick="showAbout()">
+                        <i class="fas fa-info-circle"></i>
+                        About Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="auth-side-panel register-panel">
+            <div class="panel-content">
+                <div class="panel-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h2>Advanced Learning Platform</h2>
+                <p>
+                    Join thousands of students and professionals advancing their biomedical 
+                    engineering knowledge through immersive virtual laboratories.
+                </p>
+                
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Personalized Learning</strong>
+                            <span>Adaptive content based on your background and goals</span>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Progress Tracking</strong>
+                            <span>Monitor your learning journey and achievements</span>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Certificate Ready</strong>
+                            <span>Complete experiments to earn completion certificates</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <i class="fas fa-quote-left"></i>
+                        <p>"This virtual lab transformed how I understand biomedical engineering concepts."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <strong>Sarah Johnson</strong>
+                        <span>Biomedical Engineering Student, MIT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js?v=1"></script>
+    <script src="api-client.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>HRV Virtual Lab — Heart Rate Variability Analysis</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-spinner">
+                <svg viewBox="0 0 50 50" class="spinner-svg">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e0e7ef" stroke-width="4"></circle>
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e74c3c" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" class="spinner-circle"></circle>
+                </svg>
+            </div>
+            <h1>HRV Virtual Laboratory</h1>
+            <p>Preparing your workstation...</p>
+            <div class="load-bar"><div class="load-fill" id="load-progress"></div></div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app" class="hidden">
+        <!-- LEFT SIDEBAR NAVIGATION -->
+        <aside id="sidebar-nav">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo.png" alt="Lab Logo" class="logo-image">
+                </div>
+                <div class="lab-title">
+                    <i class="fas fa-heartbeat lab-icon"></i>
+                    <h2>HRV Virtual Lab</h2>
+                </div>
+                <p class="lab-subtitle">Biomedical Engineering</p>
+            </div>
+
+            <!-- Navigation Steps -->
+            <nav class="nav-steps-vertical" id="nav-steps">
+                <div class="nav-step active" data-step="0">
+                    <div class="step-indicator">
+                        <i class="fas fa-flask"></i>
+                        <span class="step-check"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-label">Start</span>
+                    </div>
+                </div>
+                <div class="nav-step" data-step="1">
+                    <div class="step-indicator">
+                        <i class="fas fa-tools"></i>
+                        <span class="step-check"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-label">Equipment</span>
+                    </div>
+                </div>
+                <div class="nav-step" data-step="2">
+                    <div class="step-indicator">
+                        <i class="fas fa-wave-square"></i>
+                        <span class="step-check"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-label">Recording</span>
+                    </div>
+                </div>
+                <div class="nav-step" data-step="3">
+                    <div class="step-indicator">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="step-check"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-label">Analysis</span>
+                    </div>
+                </div>
+                <div class="nav-step" data-step="4">
+                    <div class="step-indicator">
+                        <i class="fas fa-stethoscope"></i>
+                        <span class="step-check"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-label">Clinical</span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <button class="btn-back-hub" onclick="window.location.href='../index.html'">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Hub</span>
+                </button>
+                <button id="btn-glossary" class="btn-glossary">
+                    <i class="fas fa-book"></i>
+                    <span>Glossary</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main id="main-content">
+
+            <!-- STEP 0: INTRODUCTION -->
+            <section class="lab-step active" id="step-0">
+                <div class="step-container">
+                    <div class="welcome-card">
+                        <div class="welcome-icon">
+                            <i class="fas fa-heart-pulse"></i>
+                        </div>
+                        <h2>Heart Rate Variability (HRV) Analysis</h2>
+                        <p class="welcome-subtitle">Virtual Laboratory Experiment</p>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <i class="fas fa-bullseye"></i>
+                                <h3>Objective</h3>
+                            </div>
+                            <p>Understand the relationship between heart rate variability and the Autonomic Nervous System (ANS). Learn to record, analyze, and interpret HRV signals to assess cardiac health and stress levels.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-header">
+                                <i class="fas fa-graduation-cap"></i>
+                                <h3>Learning Outcomes</h3>
+                            </div>
+                            <ul>
+                                <li>Explain HRV physiology and its significance</li>
+                                <li>Calculate time-domain HRV metrics (SDNN, RMSSD)</li>
+                                <li>Interpret LF/HF ratio and frequency domain analysis</li>
+                                <li>Relate HRV patterns to ANS balance</li>
+                                <li>Identify stress-related changes in HRV</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="science-section-card">
+                        <h3><i class="fas fa-microscope"></i> Introduction to HRV</h3>
+                        <div class="science-grid">
+                            <div class="science-item">
+                                <h4><i class="fas fa-heart"></i> What is HRV?</h4>
+                                <p>Heart Rate Variability (HRV) refers to the variation in time intervals between consecutive heartbeats. These intervals are called RR intervals (time between two R-peaks in ECG). A healthy heart does not beat at perfectly regular intervals.</p>
+                            </div>
+                            <div class="science-item">
+                                <h4><i class="fas fa-chart-line"></i> RR Intervals</h4>
+                                <p>RR intervals are measured in milliseconds between consecutive R-peaks in an ECG signal. Higher variability indicates better adaptability, while lower variability may suggest stress, fatigue, or pathology.</p>
+                            </div>
+                            <div class="science-item">
+                                <h4><i class="fas fa-balance-scale"></i> Adaptability Indicator</h4>
+                                <p>HRV reflects how well the heart adapts to internal and external stimuli. Higher variability means better adaptability to changing conditions, while lower variability indicates reduced adaptive capacity.</p>
+                            </div>
+                            <div class="science-item">
+                                <h4><i class="fas fa-signal"></i> Key Insight</h4>
+                                <ul class="signal-specs">
+                                    <li><strong>High HRV:</strong> Better adaptability</li>
+                                    <li><strong>Low HRV:</strong> Stress, fatigue, pathology</li>
+                                    <li><strong>Normal RR:</strong> 600-1200 ms</li>
+                                    <li><strong>Heart Rate:</strong> 50-100 bpm</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="muap-visualization">
+                        <canvas id="welcome-ecg-canvas" width="700" height="200"></canvas>
+                        <p class="canvas-caption">ECG Signal showing R-peaks and RR intervals — The basis of HRV analysis</p>
+                    </div>
+
+                    <!-- ANS Theory Section -->
+                    <div class="ans-theory-container">
+                        <div class="ans-intro-card">
+                            <p>The heart is regulated by the <strong>Autonomic Nervous System (ANS)</strong>, which has two branches that work in balance to control heart rate and HRV.</p>
+                        </div>
+
+                        <div class="ans-branches">
+                            <!-- Sympathetic -->
+                            <div class="ans-card sympathetic" id="ans-sns">
+                                <div class="ans-card-header">
+                                    <div class="ans-icon sns-icon">
+                                        <i class="fas fa-bolt"></i>
+                                    </div>
+                                    <h3>Sympathetic Nervous System (SNS)</h3>
+                                    <span class="ans-tag">"Fight or Flight"</span>
+                                </div>
+                                <div class="ans-card-body">
+                                    <ul class="ans-effects">
+                                        <li><i class="fas fa-arrow-up"></i> Increases heart rate</li>
+                                        <li><i class="fas fa-arrow-down"></i> Reduces HRV</li>
+                                        <li><i class="fas fa-fire"></i> Activates during stress</li>
+                                        <li><i class="fas fa-running"></i> Exercise response</li>
+                                    </ul>
+                                    <div class="ans-visual">
+                                        <canvas id="sns-ecg-canvas" width="200" height="80"></canvas>
+                                        <span class="visual-label">Low HRV Pattern</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parasympathetic -->
+                            <div class="ans-card parasympathetic" id="ans-pns">
+                                <div class="ans-card-header">
+                                    <div class="ans-icon pns-icon">
+                                        <i class="fas fa-leaf"></i>
+                                    </div>
+                                    <h3>Parasympathetic Nervous System (PNS)</h3>
+                                    <span class="ans-tag">"Rest and Digest"</span>
+                                </div>
+                                <div class="ans-card-body">
+                                    <ul class="ans-effects">
+                                        <li><i class="fas fa-arrow-down"></i> Decreases heart rate</li>
+                                        <li><i class="fas fa-arrow-up"></i> Increases HRV</li>
+                                        <li><i class="fas fa-bed"></i> Active during rest</li>
+                                        <li><i class="fas fa-spa"></i> Recovery state</li>
+                                    </ul>
+                                    <div class="ans-visual">
+                                        <canvas id="pns-ecg-canvas" width="200" height="80"></canvas>
+                                        <span class="visual-label">High HRV Pattern</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ans-balance-card">
+                            <h4><i class="fas fa-balance-scale-right"></i> ANS Balance</h4>
+                            <p>HRV reflects the dynamic balance between SNS and PNS activity. A healthy individual shows good HRV, indicating proper ANS regulation and adaptability.</p>
+                            <div class="balance-meter">
+                                <div class="balance-bar">
+                                    <div class="balance-indicator" id="balance-indicator"></div>
+                                </div>
+                                <div class="balance-labels">
+                                    <span class="sns-label">SNS Dominant</span>
+                                    <span class="balance-label">Balanced</span>
+                                    <span class="pns-label">PNS Dominant</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary btn-lg" id="start-lab-btn">
+                        <i class="fas fa-play"></i>
+                        <span>Begin Experiment</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- STEP 1: EQUIPMENT -->
+            <section class="lab-step" id="step-1">
+                <div class="step-container">
+                    <div class="section-header">
+                        <i class="fas fa-toolbox"></i>
+                        <div>
+                            <h2>Equipment Familiarization</h2>
+                            <p>Click on each piece of equipment to learn about it. Explore ALL items before proceeding.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="equipment-lab">
+                        <!-- ECG Preview Display -->
+                        <div class="equipment-ecg-preview">
+                            <div class="ecg-preview-header">
+                                <i class="fas fa-heart-pulse"></i>
+                                <span>ECG Signal Preview</span>
+                            </div>
+                            <canvas id="equipment-ecg-canvas" width="600" height="120"></canvas>
+                        </div>
+                        
+                        <div class="equipment-items-wrapper">
+                            <div class="equipment-bench" id="equipment-bench">
+                                <!-- ECG Machine -->
+                                <div class="equipment-item" data-equipment="ecg-system">
+                                    <div class="equip-visual ecg-machine">
+                                        <i class="fas fa-desktop"></i>
+                                    </div>
+                                    <span class="equip-label">ECG System</span>
+                                    <span class="equip-check"><i class="fas fa-check"></i></span>
+                                </div>
+
+                                <!-- ECG Electrodes -->
+                                <div class="equipment-item" data-equipment="electrodes">
+                                    <div class="equip-visual electrodes">
+                                        <i class="fas fa-circle-nodes"></i>
+                                    </div>
+                                    <span class="equip-label">ECG Electrodes</span>
+                                    <span class="equip-check"><i class="fas fa-check"></i></span>
+                                </div>
+
+                                <!-- Lead Cables -->
+                                <div class="equipment-item" data-equipment="leads">
+                                    <div class="equip-visual leads">
+                                        <i class="fas fa-plug"></i>
+                                    </div>
+                                    <span class="equip-label">Lead Cables</span>
+                                    <span class="equip-check"><i class="fas fa-check"></i></span>
+                                </div>
+
+                                <!-- Conductive Gel -->
+                                <div class="equipment-item" data-equipment="gel">
+                                    <div class="equip-visual gel-tube">
+                                        <i class="fas fa-droplet"></i>
+                                    </div>
+                                    <span class="equip-label">Conductive Gel</span>
+                                    <span class="equip-check"><i class="fas fa-check"></i></span>
+                                </div>
+
+                                <!-- Alcohol Swabs -->
+                                <div class="equipment-item" data-equipment="swabs">
+                                    <div class="equip-visual swabs-box">
+                                        <i class="fas fa-prescription-bottle"></i>
+                                    </div>
+                                    <span class="equip-label">Alcohol Swabs</span>
+                                    <span class="equip-check"><i class="fas fa-check"></i></span>
+                                </div>
+
+                                <!-- HRV Analysis Software -->
+                                <div class="equipment-item" data-equipment="software">
+                                    <div class="equip-visual software">
+                                        <i class="fas fa-laptop-code"></i>
+                                    </div>
+                                    <span class="equip-label">HRV Software</span>
+                                    <span class="equip-check"><i class="fas fa-check"></i></span>
+                                </div>
+                            </div>
+
+                            <!-- Equipment Info Panel -->
+                            <div class="equipment-info-panel" id="equip-info-panel">
+                                <div class="info-placeholder">
+                                    <i class="fas fa-hand-pointer"></i>
+                                    <p>Click on equipment to learn about it</p>
+                                </div>
+                                <div class="info-details hidden" id="equip-details">
+                                    <h3 id="equip-detail-title"></h3>
+                                    <div id="equip-detail-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="equip-progress-fill"></div>
+                        </div>
+                        <span class="progress-text" id="equip-progress-text">0 / 6 explored</span>
+                        <button class="btn-primary hidden" id="equip-next-btn">
+                            <span>Continue to Recording</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 2: RECORDING -->
+            <section class="lab-step" id="step-2">
+                <div class="step-container">
+                    <div class="section-header">
+                        <i class="fas fa-wave-square"></i>
+                        <div>
+                            <h2>ECG Recording & R-Peak Detection</h2>
+                            <p>Record ECG signal and extract RR intervals for HRV analysis.</p>
+                        </div>
+                    </div>
+
+                    <div class="recording-workspace">
+                        <!-- Condition Selection -->
+                        <div class="condition-panel">
+                            <h3><i class="fas fa-user-check"></i> Select Subject Condition</h3>
+                            <div class="condition-cards" id="condition-cards">
+                                <div class="condition-card active" data-condition="relaxed">
+                                    <div class="condition-icon"><i class="fas fa-spa"></i></div>
+                                    <h4>Relaxed State</h4>
+                                    <p>Resting, calm breathing</p>
+                                    <span class="condition-hrv">High HRV Expected</span>
+                                </div>
+                                <div class="condition-card" data-condition="stressed">
+                                    <div class="condition-icon"><i class="fas fa-brain"></i></div>
+                                    <h4>Mental Stress</h4>
+                                    <p>Cognitive task, anxiety</p>
+                                    <span class="condition-hrv">Low HRV Expected</span>
+                                </div>
+                                <div class="condition-card" data-condition="exercise">
+                                    <div class="condition-icon"><i class="fas fa-running"></i></div>
+                                    <h4>Post-Exercise</h4>
+                                    <p>Recovery from activity</p>
+                                    <span class="condition-hrv">Variable HRV</span>
+                                </div>
+                                <div class="condition-card" data-condition="pathological">
+                                    <div class="condition-icon"><i class="fas fa-heartbeat"></i></div>
+                                    <h4>Cardiac Condition</h4>
+                                    <p>Autonomic dysfunction</p>
+                                    <span class="condition-hrv">Abnormal HRV</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ECG Display -->
+                        <div class="ecg-display-panel">
+                            <div class="display-header">
+                                <h3><i class="fas fa-heart-pulse"></i> ECG Signal Monitor</h3>
+                                <div class="monitor-controls">
+                                    <div class="heart-beat-indicator">
+                                        <i class="fas fa-heart" id="heart-beat-icon"></i>
+                                    </div>
+                                    <div class="heart-rate-display">
+                                        <span class="hr-label">HR</span>
+                                        <span class="hr-value" id="hr-value">--</span>
+                                        <span class="hr-unit">bpm</span>
+                                    </div>
+                                    <div class="rr-display">
+                                        <span class="rr-label">RR</span>
+                                        <span class="rr-value" id="rr-value">--</span>
+                                        <span class="rr-unit">ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ecg-canvas-container">
+                                <canvas id="ecg-canvas" width="800" height="200"></canvas>
+                                <div class="r-peak-markers" id="r-peak-markers"></div>
+                            </div>
+                            <div class="recording-controls">
+                                <button class="btn-record" id="btn-record">
+                                    <i class="fas fa-circle"></i>
+                                    <span>Start Recording</span>
+                                </button>
+                                <button class="btn-stop hidden" id="btn-stop">
+                                    <i class="fas fa-stop"></i>
+                                    <span>Stop Recording</span>
+                                </button>
+                                <div class="record-timer hidden" id="record-timer">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="timer-display">00:00</span>
+                                </div>
+                                <button class="btn-primary hidden" id="btn-analyze">
+                                    <span>Analyze Data</span>
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RR Interval Tachogram -->
+                        <div class="tachogram-panel">
+                            <h3><i class="fas fa-chart-area"></i> RR Interval Tachogram</h3>
+                            <canvas id="tachogram-canvas" width="800" height="150"></canvas>
+                            <div class="tachogram-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Beats Recorded</span>
+                                    <span class="stat-value" id="total-beats">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Mean RR</span>
+                                    <span class="stat-value" id="mean-rr">-- ms</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Min RR</span>
+                                    <span class="stat-value" id="min-rr">-- ms</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Max RR</span>
+                                    <span class="stat-value" id="max-rr">-- ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-progress">
+                        <button class="btn-primary hidden" id="recording-next-btn">
+                            <span>Proceed to Analysis</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 3: ANALYSIS -->
+            <section class="lab-step" id="step-3">
+                <div class="step-container">
+                    <div class="section-header">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <h2>HRV Analysis</h2>
+                            <p>Analyze the recorded RR intervals using time-domain, frequency-domain, and nonlinear methods.</p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-workspace">
+                        <!-- Analysis Tabs -->
+                        <div class="analysis-tabs">
+                            <button class="analysis-tab active" data-tab="time-domain">
+                                <i class="fas fa-clock"></i>
+                                <span>Time Domain</span>
+                            </button>
+                            <button class="analysis-tab" data-tab="frequency-domain">
+                                <i class="fas fa-wave-square"></i>
+                                <span>Frequency Domain</span>
+                            </button>
+                            <button class="analysis-tab" data-tab="nonlinear">
+                                <i class="fas fa-project-diagram"></i>
+                                <span>Nonlinear</span>
+                            </button>
+                        </div>
+
+                        <!-- Time Domain Analysis -->
+                        <div class="analysis-panel active" id="time-domain-panel">
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h4>Mean HR</h4>
+                                        <i class="fas fa-info-circle" title="Average heart rate"></i>
+                                    </div>
+                                    <div class="metric-value" id="meanhr-value">-- bpm</div>
+                                    <div class="metric-desc">Average heart rate</div>
+                                </div>
+                                <div class="metric-card highlight">
+                                    <div class="metric-header">
+                                        <h4>SDNN</h4>
+                                        <i class="fas fa-info-circle" title="Standard Deviation of NN intervals - Overall HRV measure"></i>
+                                    </div>
+                                    <div class="metric-value" id="sdnn-value">-- ms</div>
+                                    <div class="metric-desc">Standard deviation of RR intervals</div>
+                                    <div class="metric-reference">Normal: 50-100 ms</div>
+                                </div>
+                                <div class="metric-card highlight">
+                                    <div class="metric-header">
+                                        <h4>RMSSD</h4>
+                                        <i class="fas fa-info-circle" title="Root Mean Square of Successive Differences - PNS activity indicator"></i>
+                                    </div>
+                                    <div class="metric-value" id="rmssd-value">-- ms</div>
+                                    <div class="metric-desc">Root mean square of successive differences</div>
+                                    <div class="metric-reference">High = Strong PNS activity</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-header">
+                                        <h4>pNN50</h4>
+                                        <i class="fas fa-info-circle" title="Percentage of successive RR differences > 50ms"></i>
+                                    </div>
+                                    <div class="metric-value" id="pnn50-value">-- %</div>
+                                    <div class="metric-desc">% of intervals differing by >50ms</div>
+                                </div>
+                            </div>
+                            <div class="histogram-container">
+                                <h4><i class="fas fa-chart-bar"></i> RR Interval Distribution</h4>
+                                <canvas id="histogram-canvas" width="600" height="200"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Frequency Domain Analysis -->
+                        <div class="analysis-panel" id="frequency-domain-panel">
+                            <div class="frequency-info">
+                                <p>Frequency domain analysis reveals the power distribution across different frequency bands, reflecting ANS activity.</p>
+                            </div>
+                            <div class="spectrum-container">
+                                <canvas id="spectrum-canvas" width="700" height="250"></canvas>
+                                <div class="frequency-bands">
+                                    <div class="band-marker vlf">
+                                        <span class="band-range">VLF: 0-0.04 Hz</span>
+                                    </div>
+                                    <div class="band-marker lf">
+                                        <span class="band-range">LF: 0.04-0.15 Hz</span>
+                                    </div>
+                                    <div class="band-marker hf">
+                                        <span class="band-range">HF: 0.15-0.4 Hz</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frequency-metrics">
+                                <div class="freq-metric-card lf-card">
+                                    <div class="freq-icon"><i class="fas fa-bolt"></i></div>
+                                    <h4>LF Power</h4>
+                                    <div class="freq-value" id="lf-value">-- ms²</div>
+                                    <p>0.04-0.15 Hz</p>
+                                    <span class="freq-desc">Mixed SNS + PNS</span>
+                                </div>
+                                <div class="freq-metric-card hf-card">
+                                    <div class="freq-icon"><i class="fas fa-leaf"></i></div>
+                                    <h4>HF Power</h4>
+                                    <div class="freq-value" id="hf-value">-- ms²</div>
+                                    <p>0.15-0.4 Hz</p>
+                                    <span class="freq-desc">Parasympathetic activity</span>
+                                </div>
+                                <div class="freq-metric-card ratio-card">
+                                    <div class="freq-icon"><i class="fas fa-balance-scale"></i></div>
+                                    <h4>LF/HF Ratio</h4>
+                                    <div class="freq-value" id="ratio-value">--</div>
+                                    <p>ANS Balance</p>
+                                    <span class="freq-desc">SNS/PNS Balance Indicator</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nonlinear Analysis -->
+                        <div class="analysis-panel" id="nonlinear-panel">
+                            <div class="nonlinear-info">
+                                <p>Nonlinear methods provide advanced physiological interpretation of HRV complexity and patterns.</p>
+                            </div>
+                            <div class="poincare-container">
+                                <h4><i class="fas fa-braille"></i> Poincaré Plot</h4>
+                                <p class="poincare-desc">Each point represents consecutive RR intervals (RRn vs RRn+1). The ellipse shape indicates HRV patterns.</p>
+                                <canvas id="poincare-canvas" width="400" height="400"></canvas>
+                                <div class="poincare-metrics">
+                                    <div class="poincare-stat">
+                                        <span class="stat-label">SD1</span>
+                                        <span class="stat-value" id="sd1-value">-- ms</span>
+                                        <span class="stat-desc">Short-term variability</span>
+                                    </div>
+                                    <div class="poincare-stat">
+                                        <span class="stat-label">SD2</span>
+                                        <span class="stat-value" id="sd2-value">-- ms</span>
+                                        <span class="stat-desc">Long-term variability</span>
+                                    </div>
+                                    <div class="poincare-stat">
+                                        <span class="stat-label">SD1/SD2</span>
+                                        <span class="stat-value" id="sd-ratio-value">--</span>
+                                        <span class="stat-desc">Variability ratio</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" id="analysis-next-btn">
+                        <span>View Clinical Interpretation</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- STEP 4: CLINICAL INTERPRETATION -->
+            <section class="lab-step" id="step-4">
+                <div class="step-container">
+                    <div class="section-header">
+                        <i class="fas fa-stethoscope"></i>
+                        <div>
+                            <h2>Clinical Applications & Interpretation</h2>
+                            <p>Learn how HRV analysis is applied in clinical settings and interpret your results.</p>
+                        </div>
+                    </div>
+
+                    <!-- Interpretation Guide -->
+                    <div class="interpretation-section">
+                        <h3><i class="fas fa-clipboard-list"></i> Interpretation Guide</h3>
+                        <div class="interpretation-table">
+                            <div class="interp-row header">
+                                <span class="interp-condition">Condition</span>
+                                <span class="interp-hrv">HRV Level</span>
+                                <span class="interp-meaning">Interpretation</span>
+                            </div>
+                            <div class="interp-row">
+                                <span class="interp-condition"><i class="fas fa-spa"></i> Relaxed State</span>
+                                <span class="interp-hrv high">High HRV</span>
+                                <span class="interp-meaning">Strong parasympathetic activity</span>
+                            </div>
+                            <div class="interp-row">
+                                <span class="interp-condition"><i class="fas fa-brain"></i> Mental Stress</span>
+                                <span class="interp-hrv low">Low HRV</span>
+                                <span class="interp-meaning">Sympathetic dominance</span>
+                            </div>
+                            <div class="interp-row">
+                                <span class="interp-condition"><i class="fas fa-dumbbell"></i> Overtraining</span>
+                                <span class="interp-hrv declining">Decreasing HRV</span>
+                                <span class="interp-meaning">Fatigue, need for recovery</span>
+                            </div>
+                            <div class="interp-row">
+                                <span class="interp-condition"><i class="fas fa-heart-broken"></i> Cardiac Disease</span>
+                                <span class="interp-hrv abnormal">Abnormal HRV</span>
+                                <span class="interp-meaning">Autonomic dysfunction</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Applications -->
+                    <div class="applications-section">
+                        <h3><i class="fas fa-hospital"></i> Clinical Applications</h3>
+                        <div class="applications-grid">
+                            <div class="app-card">
+                                <div class="app-icon"><i class="fas fa-brain"></i></div>
+                                <h4>Stress Monitoring</h4>
+                                <p>Track stress levels and autonomic balance in workplace wellness programs.</p>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-icon"><i class="fas fa-heartbeat"></i></div>
+                                <h4>Cardiac Risk Assessment</h4>
+                                <p>Predict cardiovascular events and assess post-MI prognosis.</p>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-icon"><i class="fas fa-bed"></i></div>
+                                <h4>Sleep Quality</h4>
+                                <p>Evaluate sleep stages and recovery quality through overnight HRV.</p>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-icon"><i class="fas fa-head-side-virus"></i></div>
+                                <h4>Mental Health</h4>
+                                <p>Monitor depression, anxiety, and emotional regulation.</p>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-icon"><i class="fas fa-running"></i></div>
+                                <h4>Athletic Performance</h4>
+                                <p>Optimize training load and monitor recovery in athletes.</p>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-icon"><i class="fas fa-procedures"></i></div>
+                                <h4>ICU Monitoring</h4>
+                                <p>Continuous autonomic assessment in critical care patients.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Factors Affecting HRV -->
+                    <div class="factors-section">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Factors Affecting HRV</h3>
+                        <div class="factors-grid">
+                            <div class="factor-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Age</span>
+                            </div>
+                            <div class="factor-item">
+                                <i class="fas fa-lungs"></i>
+                                <span>Breathing Rate</span>
+                            </div>
+                            <div class="factor-item">
+                                <i class="fas fa-heartbeat"></i>
+                                <span>Physical Fitness</span>
+                            </div>
+                            <div class="factor-item">
+                                <i class="fas fa-dizzy"></i>
+                                <span>Stress Level</span>
+                            </div>
+                            <div class="factor-item">
+                                <i class="fas fa-coffee"></i>
+                                <span>Caffeine</span>
+                            </div>
+                            <div class="factor-item">
+                                <i class="fas fa-pills"></i>
+                                <span>Medications</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Your Results Summary -->
+                    <div class="results-summary" id="results-summary">
+                        <h3><i class="fas fa-file-medical-alt"></i> Your Analysis Summary</h3>
+                        <div class="summary-content" id="summary-content">
+                            <p class="no-data">Complete the recording and analysis steps to see your results here.</p>
+                        </div>
+                    </div>
+
+                    <div class="completion-section">
+                        <div class="completion-badge">
+                            <i class="fas fa-award"></i>
+                            <h3>Lab Complete!</h3>
+                            <p>You have successfully completed the HRV Virtual Lab experiment.</p>
+                            <p class="completion-hint">Use the navigation bar to revisit any section.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- GLOSSARY MODAL -->
+    <div id="glossary-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-book"></i> HRV Glossary</h2>
+                <button class="modal-close" id="close-glossary">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="glossary-search">
+                    <input type="text" id="glossary-search" placeholder="Search terms...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="glossary-list" id="glossary-list">
+                    <div class="glossary-item">
+                        <h4>HRV (Heart Rate Variability)</h4>
+                        <p>The variation in time intervals between consecutive heartbeats, reflecting autonomic nervous system activity.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>RR Interval</h4>
+                        <p>The time between two consecutive R-peaks in an ECG signal, measured in milliseconds.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>SDNN</h4>
+                        <p>Standard Deviation of NN intervals. A measure of overall HRV reflecting both sympathetic and parasympathetic activity.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>RMSSD</h4>
+                        <p>Root Mean Square of Successive Differences. Primarily reflects parasympathetic (vagal) activity.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>pNN50</h4>
+                        <p>Percentage of successive RR intervals that differ by more than 50ms. Another measure of parasympathetic activity.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>LF (Low Frequency)</h4>
+                        <p>Power in the 0.04-0.15 Hz band. Reflects a mixture of sympathetic and parasympathetic activity.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>HF (High Frequency)</h4>
+                        <p>Power in the 0.15-0.4 Hz band. Primarily reflects parasympathetic (vagal) activity and respiratory sinus arrhythmia.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>LF/HF Ratio</h4>
+                        <p>The ratio of LF to HF power. Used as an indicator of sympathovagal balance.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>ANS (Autonomic Nervous System)</h4>
+                        <p>The part of the nervous system that regulates involuntary functions including heart rate. Consists of sympathetic and parasympathetic branches.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>SNS (Sympathetic Nervous System)</h4>
+                        <p>"Fight or Flight" system. Increases heart rate and reduces HRV when activated.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>PNS (Parasympathetic Nervous System)</h4>
+                        <p>"Rest and Digest" system. Decreases heart rate and increases HRV when dominant.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>Poincaré Plot</h4>
+                        <p>A scatter plot of consecutive RR intervals (RRn vs RRn+1). The shape of the plot reveals HRV patterns.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>SD1</h4>
+                        <p>Standard deviation perpendicular to the line of identity in Poincaré plot. Measures short-term variability.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>SD2</h4>
+                        <p>Standard deviation along the line of identity in Poincaré plot. Measures long-term variability.</p>
+                    </div>
+                    <div class="glossary-item">
+                        <h4>R-peak</h4>
+                        <p>The highest point in the QRS complex of an ECG waveform, used as a reference for measuring RR intervals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="hrv-engine.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

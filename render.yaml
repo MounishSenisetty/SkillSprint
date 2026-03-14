@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: virtual-lab
+    runtime: node
+    plan: free
+    buildCommand: npm install --prefix backend
+    startCommand: node backend/server.js
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTO_INIT_DB
+        value: "true"
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SSL_REJECT_UNAUTHORIZED
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: virtual-lab-db
+          property: connectionString
+
+databases:
+  - name: virtual-lab-db
+    plan: free

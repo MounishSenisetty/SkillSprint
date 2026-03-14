@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Storage Verification — Virtual Laboratory</title>
+    <link rel="stylesheet" href="auth-style.css">
+    <style>
+        .admin-panel {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .data-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .data-table th, .data-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .data-table th {
+            background: #3498db;
+            color: white;
+        }
+        .json-data {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #3498db;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 2rem;">
+    
+    <div class="admin-panel">
+        <a href="index.html" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Laboratory Hub
+        </a>
+        
+        <h1 style="color: #2c3e50; margin-bottom: 2rem;">
+            <i class="fas fa-database"></i>
+            User Data Storage Verification
+        </h1>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="refreshData()">
+                <i class="fas fa-sync"></i> Refresh Data
+            </button>
+            <button class="btn btn-success" onclick="exportData()">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+            <button class="btn btn-danger" onclick="clearAllData()">
+                <i class="fas fa-trash"></i> Clear All Data
+            </button>
+        </div>
+
+        <!-- Storage Statistics -->
+        <div class="data-section">
+            <h2><i class="fas fa-chart-bar"></i> Storage Statistics</h2>
+            <div class="stats-grid" id="stats-grid">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Registered Users -->
+        <div class="data-section">
+            <h2><i class="fas fa-users"></i> Registered Users</h2>
+            <div id="users-content">
+                <!-- Users table will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Current Session -->
+        <div class="data-section">
+            <h2><i class="fas fa-user-check"></i> Current Session</h2>
+            <div id="session-content">
+                <!-- Session data will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Raw LocalStorage Data -->
+        <div class="data-section">
+            <h2><i class="fas fa-code"></i> Raw LocalStorage Data</h2>
+            <div id="raw-data-content">
+                <!-- Raw data will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Storage Usage -->
+        <div class="data-section">
+            <h2><i class="fas fa-hdd"></i> Storage Usage</h2>
+            <div id="storage-usage">
+                <!-- Storage usage will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="api-client.js"></script>
+    <script>
+        // Data Storage Verification System
+        function refreshData() {
+            loadStorageStats();
+            loadRegisteredUsers();
+            loadCurrentSession();
+            loadRawData();
+            loadStorageUsage();
+        }
+
+        function loadStorageStats() {
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            const authToken = localStorage.getItem('authToken');
+            const authExpiry = localStorage.getItem('authExpiry');
+            
+            const stats = [
+                {
+                    number: registeredUsers.length,
+                    label: 'Registered Users'
+                },
+                {
+                    number: currentUser ? 1 : 0,
+                    label: 'Active Session'
+                },
+                {
+                    number: authToken ? '✓' : '✗',
+                    label: 'Auth Token'
+                },
+                {
+                    number: Object.keys(localStorage).length,
+                    label: 'Storage Keys'
+                }
+            ];
+
+            const statsHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-number">${stat.number}</div>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('stats-grid').innerHTML = statsHTML;
+        }
+
+        function loadRegisteredUsers() {
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            
+            if (registeredUsers.length === 0) {
+                document.getElementById('users-content').innerHTML = '<p><em>No registered users found.</em></p>';
+                return;
+            }
+
+            const tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Institution</th>
+                            <th>Program Level</th>
+                            <th>Field of Study</th>
+                            <th>Registered</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${registeredUsers.map(user => `
+                            <tr>
+                                <td>${user.firstName} ${user.lastName}</td>
+                                <td>${user.email}</td>
+                                <td>${user.institution || 'N/A'}</td>
+                                <td>${user.programLevel || 'N/A'}</td>
+                                <td>${user.fieldOfStudy || 'N/A'}</td>
+                                <td>${new Date(user.registeredAt).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('users-content').innerHTML = tableHTML;
+        }
+
+        function loadCurrentSession() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            const authToken = localStorage.getItem('authToken');
+            const authExpiry = localStorage.getItem('authExpiry');
+
+            if (!currentUser) {
+                document.getElementById('session-content').innerHTML = '<p><em>No active session.</em></p>';
+                return;
+            }
+
+            const sessionHTML = `
+                <table class="data-table">
+                    <tr><th>User ID</th><td>${currentUser.userId || 'N/A'}</td></tr>
+                    <tr><th>Name</th><td>${currentUser.firstName} ${currentUser.lastName}</td></tr>
+                    <tr><th>Email</th><td>${currentUser.email}</td></tr>
+                    <tr><th>Institution</th><td>${currentUser.institution || 'N/A'}</td></tr>
+                    <tr><th>Program Level</th><td>${currentUser.programLevel || 'N/A'}</td></tr>
+                    <tr><th>Field of Study</th><td>${currentUser.fieldOfStudy || 'N/A'}</td></tr>
+                    <tr><th>Lab Experience</th><td>${currentUser.labExperience || 'N/A'}</td></tr>
+                    <tr><th>Learning Goals</th><td>${(currentUser.learningGoals || []).join(', ') || 'N/A'}</td></tr>
+                    <tr><th>Interests</th><td>${(currentUser.interests || []).join(', ') || 'N/A'}</td></tr>
+                    <tr><th>Learning Pace</th><td>${currentUser.learningPace || 'N/A'}</td></tr>
+                    <tr><th>Auth Token</th><td>${authToken ? authToken.substring(0, 20) + '...' : 'None'}</td></tr>
+                    <tr><th>Session Expires</th><td>${authExpiry ? new Date(authExpiry).toLocaleString() : 'End of session'}</td></tr>
+                </table>
+            `;
+
+            document.getElementById('session-content').innerHTML = sessionHTML;
+        }
+
+        function loadRawData() {
+            const allData = {};
+            
+            // Collect all localStorage data
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    const value = localStorage.getItem(key);
+                    allData[key] = JSON.parse(value);
+                } catch (e) {
+                    allData[key] = localStorage.getItem(key);
+                }
+            }
+
+            const rawDataHTML = `
+                <div class="json-data">${JSON.stringify(allData, null, 2)}</div>
+            `;
+
+            document.getElementById('raw-data-content').innerHTML = rawDataHTML;
+        }
+
+        function loadStorageUsage() {
+            let totalSize = 0;
+            const storageData = [];
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                const size = new Blob([value]).size;
+                totalSize += size;
+                
+                storageData.push({
+                    key: key,
+                    size: size,
+                    sizeFormatted: formatBytes(size)
+                });
+            }
+
+            storageData.sort((a, b) => b.size - a.size);
+
+            const usageHTML = `
+                <p><strong>Total Storage Used:</strong> ${formatBytes(totalSize)}</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${storageData.map(item => `
+                            <tr>
+                                <td>${item.key}</td>
+                                <td>${item.sizeFormatted}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('storage-usage').innerHTML = usageHTML;
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function exportData() {
+            const allData = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    allData[key] = JSON.parse(localStorage.getItem(key));
+                } catch (e) {
+                    allData[key] = localStorage.getItem(key);
+                }
+            }
+
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `virtual-lab-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('Data exported successfully!');
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear ALL stored data? This cannot be undone.')) {
+                localStorage.clear();
+                alert('All data cleared!');
+                refreshData();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', refreshData);
+    </script>
+</body>
+</html>

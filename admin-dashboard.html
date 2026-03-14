@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Virtual Lab</title>
+    <link rel="stylesheet" href="auth-style.css">
+    <style>
+        body { background: #f4f7fb; }
+        .page { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,.08); margin-bottom: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+        .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .btn { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: #e5e7eb; }
+        input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="card top">
+        <div>
+            <h2>Admin Dashboard</h2>
+            <p>Platform usage, roles and experiment catalog management</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="refresh-btn">Refresh</button>
+            <button class="btn btn-secondary" id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card"><h4>Total Experiments</h4><div id="total-exp">0</div></div>
+        <div class="card"><h4>Completed Experiments</h4><div id="completed-exp">0</div></div>
+        <div class="card"><h4>Roles</h4><div id="roles">-</div></div>
+    </div>
+
+    <div class="card">
+        <h3>Create Experiment Catalog Item</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input id="exp-key" placeholder="experiment key (e.g. hrv-advanced)">
+            <input id="exp-name" placeholder="experiment name">
+            <select id="exp-level">
+                <option value="basic">basic</option>
+                <option value="medium" selected>medium</option>
+                <option value="advanced">advanced</option>
+            </select>
+            <button class="btn btn-primary" id="create-exp-btn">Create</button>
+        </div>
+        <div id="create-status" style="margin-top:8px;"></div>
+    </div>
+</div>
+
+<script src="api-client.js"></script>
+<script>
+(async function() {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('lab_auth_token');
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    async function loadOverview() {
+        try {
+            const data = await window.labAPI.makeRequest('/lab/admin/overview');
+            document.getElementById('total-exp').textContent = data.usage?.total_experiments || 0;
+            document.getElementById('completed-exp').textContent = data.usage?.completed_experiments || 0;
+            document.getElementById('roles').textContent = (data.roles || []).map(r => `${r.role}: ${r.count}`).join(', ') || '-';
+        } catch (err) {
+            document.getElementById('roles').textContent = `Load failed: ${err.message}`;
+        }
+    }
+
+    document.getElementById('create-exp-btn').addEventListener('click', async () => {
+        const status = document.getElementById('create-status');
+        const payload = {
+            experiment_key: document.getElementById('exp-key').value.trim(),
+            experiment_name: document.getElementById('exp-name').value.trim(),
+            difficulty_level: document.getElementById('exp-level').value
+        };
+        try {
+            await window.labAPI.makeRequest('/lab/admin/experiments', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            status.textContent = 'Created successfully';
+            await loadOverview();
+        } catch (err) {
+            status.textContent = `Create failed: ${err.message}`;
+        }
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', loadOverview);
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        window.labAPI.logout();
+        window.location.href = 'login.html';
+    });
+
+    await loadOverview();
+})();
+</script>
+</body>
+</html>

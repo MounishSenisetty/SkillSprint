@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Virtual Lab</title>
+    <link rel="stylesheet" href="auth-style.css">
+    <style>
+        body { background: #f4f7fb; }
+        .page { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,.08); margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
+        .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .btn { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: #e5e7eb; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="card top">
+        <div>
+            <h2>Teacher Dashboard</h2>
+            <p>Student performance and learning progress overview</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="refresh-btn">Refresh</button>
+            <button class="btn btn-secondary" id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Students Overview</h3>
+        <div id="status">Loading...</div>
+        <table id="students-table" style="display:none;">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Started</th>
+                <th>Completed</th>
+                <th>Avg Accuracy</th>
+                <th>Avg Response Time (ms)</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="api-client.js"></script>
+<script>
+(async function() {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('lab_auth_token');
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    async function loadStudents() {
+        const status = document.getElementById('status');
+        const table = document.getElementById('students-table');
+        const tbody = table.querySelector('tbody');
+
+        status.textContent = 'Loading...';
+        table.style.display = 'none';
+
+        try {
+            const data = await window.labAPI.makeRequest('/lab/teacher/students-overview');
+            const students = data.students || [];
+            tbody.innerHTML = '';
+            students.forEach((s) => {
+                const tr = document.createElement('tr');
+                const name = `${s.first_name || ''} ${s.last_name || ''}`.trim();
+                tr.innerHTML = `
+                    <td>${name || '-'}</td>
+                    <td>${s.email || '-'}</td>
+                    <td>${s.experiments_started || 0}</td>
+                    <td>${s.experiments_completed || 0}</td>
+                    <td>${s.avg_accuracy ? Number(s.avg_accuracy).toFixed(2) : '0.00'}</td>
+                    <td>${s.avg_response_time_ms ? Math.round(Number(s.avg_response_time_ms)) : 0}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            status.textContent = students.length ? '' : 'No students found.';
+            table.style.display = students.length ? 'table' : 'none';
+        } catch (err) {
+            status.textContent = `Failed to load: ${err.message}`;
+        }
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', loadStudents);
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        window.labAPI.logout();
+        window.location.href = 'login.html';
+    });
+
+    await loadStudents();
+})();
+</script>
+</body>
+</html>

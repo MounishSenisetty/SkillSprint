@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Sign In — Virtual Laboratory Hub</title>
+    <link rel="stylesheet" href="auth-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="hidden">
+        <div class="loader-content">
+            <div class="loader-spinner">
+                <svg viewBox="0 0 50 50" class="spinner-svg">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e0e7ef" stroke-width="4"></circle>
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#3498db" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" class="spinner-circle"></circle>
+                </svg>
+            </div>
+            <h1>Signing In...</h1>
+            <p>Preparing your laboratory session...</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="auth-container">
+        <!-- Background Elements -->
+        <div class="auth-background">
+            <div class="bg-shape bg-shape-1"></div>
+            <div class="bg-shape bg-shape-2"></div>
+            <div class="bg-shape bg-shape-3"></div>
+        </div>
+
+        <!-- Authentication Card -->
+        <div class="auth-card">
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-microscope"></i>
+                </div>
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue your laboratory journey</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                    >
+                    <span class="field-error" id="email-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Password
+                    </label>
+                    <div class="password-input">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="password-toggle-icon"></i>
+                        </button>
+                    </div>
+                    <span class="field-error" id="password-error"></span>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="remember-me" name="remember">
+                        <span class="checkmark"></span>
+                        Remember me for 30 days
+                    </label>
+                    <a href="#" class="forgot-link" onclick="showForgotPassword()">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button type="submit" class="auth-btn primary" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In to Laboratory
+                </button>
+
+                <div class="form-divider">
+                    <span>or</span>
+                </div>
+
+                <div class="demo-login">
+                    <button type="button" class="auth-btn demo" onclick="demoLogin()">
+                        <i class="fas fa-flask"></i>
+                        Try Demo Account
+                    </button>
+                    <small>Experience the lab without registration</small>
+                </div>
+                
+                <!-- Debug Panel (for development) -->
+                <div class="debug-panel" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: #495057; font-size: 14px;">
+                            <i class="fas fa-bug" style="margin-right: 8px;"></i>
+                            Development Tools
+                        </h4>
+                        <button type="button" onclick="toggleDebugPanel()" style="background: none; border: none; color: #6c757d; font-size: 12px; cursor: pointer;">
+                            <i class="fas fa-chevron-down" id="debug-toggle-icon"></i>
+                        </button>
+                    </div>
+                    <div class="debug-content" id="debug-content" style="display: none;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                            <strong>Available Test Accounts:</strong><br>
+                            • demo@lab.edu / Demo123!<br>
+                            • student@university.edu / Student123!<br>
+                            <span id="registered-users-count"></span>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" onclick="debugAuth()" style="padding: 4px 8px; font-size: 11px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Check Auth Status
+                            </button>
+                            <button type="button" onclick="listAllUsers()" style="padding: 4px 8px; font-size: 11px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                List All Users
+                            </button>
+                            <button type="button" onclick="testDemoLogin()" style="padding: 4px 8px; font-size: 11px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Test Demo Login
+                            </button>
+                            <button type="button" onclick="clearAllUserData()" style="padding: 4px 8px; font-size: 11px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Clear All Data
+                            </button>
+                            <a href="user-dashboard.html" style="padding: 4px 8px; font-size: 11px; background: #6f42c1; color: white; border: none; border-radius: 4px; text-decoration: none; display: inline-block;">
+                                User Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p>
+                    Don't have an account? 
+                    <a href="register.html" class="auth-link">Create Account</a>
+                </p>
+                <div class="auth-links">
+                    <a href="#" onclick="showHelp()">
+                        <i class="fas fa-question-circle"></i>
+                        Need Help?
+                    </a>
+                    <a href="#" onclick="showAbout()">
+                        <i class="fas fa-info-circle"></i>
+                        About Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="auth-side-panel">
+            <div class="panel-content">
+                <div class="panel-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h2>Advanced Virtual Laboratory</h2>
+                <p>
+                    Access cutting-edge biomedical engineering experiments with realistic simulations, 
+                    professional data analysis, and comprehensive learning modules.
+                </p>
+                <div class="panel-features">
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Real-time Signal Processing</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>University-Grade Education</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Cross-Platform Access</span>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="panel-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">2,500+</div>
+                        <div class="stat-label">Active Students</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15+</div>
+                        <div class="stat-label">Universities</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Satisfaction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Authentication Error</h3>
+            </div>
+            <div class="modal-body">
+                <p id="error-message">An error occurred during sign in.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeErrorModal()">Close</button>
+                <button class="btn-primary" onclick="retryLogin()">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js?v=1"></script>
+    <script src="api-client.js?v=2"></script>
+    <script src="auth.js?v=2"></script>
+    
+    <!-- Debug Script for Demo Login -->
+    <script>
+        // Wait for DOM and scripts to fully load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Login page debug check:');
+            console.log('✅ DOM loaded');
+            console.log('🔍 demoLogin function available:', typeof window.demoLogin);
+            
+            // Add simple fallback demo login if main one fails
+            if (typeof window.demoLogin === 'undefined') {
+                console.warn('⚠️ Main demoLogin not found, adding fallback...');
+                window.demoLogin = function() {
+                    console.log('🔧 Fallback demo login activated');
+                    const emailField = document.getElementById('email');
+                    const passwordField = document.getElementById('password');
+                    const loginForm = document.getElementById('login-form');
+                    
+                    if (emailField && passwordField && loginForm) {
+                        emailField.value = 'demo@lab.edu';
+                        passwordField.value = 'Demo123!';
+                        console.log('✅ Demo credentials filled');
+                        
+                        // Trigger form submission
+                        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                        loginForm.dispatchEvent(submitEvent);
+                    } else {
+                        alert('Form elements not found. Please refresh the page.');
+                        console.error('❌ Missing elements:', {
+                            email: !!emailField,
+                            password: !!passwordField,
+                            form: !!loginForm
+                        });
+                    }
+                };
+                console.log('✅ Fallback demoLogin created');
+            }
+            
+            // Final check after a short delay
+            setTimeout(() => {
+                console.log('🔍 Final check - demoLogin available:', typeof window.demoLogin);
+                console.log('🔍 Auth system elements found:', {
+                    loginForm: !!document.getElementById('login-form'),
+                    emailField: !!document.getElementById('email'),
+                    passwordField: !!document.getElementById('password')
+                });
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

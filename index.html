@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Virtual Laboratory Hub — Biomedical Engineering Experiments</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-spinner">
+                <svg viewBox="0 0 50 50" class="spinner-svg">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#e0e7ef" stroke-width="4"></circle>
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#3498db" stroke-width="4" stroke-dasharray="80" stroke-dashoffset="60" class="spinner-circle"></circle>
+                </svg>
+            </div>
+            <h1>Virtual Laboratory Hub</h1>
+            <p>Initializing experiments...</p>
+            <div class="load-bar"><div class="load-fill" id="load-progress"></div></div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app" class="hidden">
+        <!-- HEADER -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="lab-identity">
+                    <i class="fas fa-microscope header-icon"></i>
+                    <div class="lab-info">
+                        <h1>Virtual Laboratory Hub</h1>
+                        <p>Biomedical Engineering Experiments</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="experiment-hub">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h2>Welcome to the Virtual Laboratory</h2>
+                    <p class="hero-subtitle">
+                        Explore cutting-edge biomedical engineering experiments through interactive simulations.
+                        Each experiment provides hands-on learning with realistic equipment and data analysis.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Experiments Grid -->
+            <section class="experiments-grid">
+                <div class="experiment-card hrv-card">
+                    <div class="card-header">
+                        <div class="experiment-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="card-badge">Cardiology</div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Heart Rate Variability (HRV)</h3>
+                        <p class="card-description">
+                            Analyze cardiac autonomic function through R-R interval measurements. 
+                            Learn ECG signal processing, time-domain and frequency-domain analysis methods.
+                        </p>
+                        <div class="card-features">
+                            <span class="feature-tag">
+                                <i class="fas fa-chart-line"></i>
+                                Signal Analysis
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-wave-square"></i>
+                                ECG Processing
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-calculator"></i>
+                                Statistical Methods
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="experiment-btn hrv-btn" onclick="openExperiment('hrv')">
+                            <i class="fas fa-play"></i>
+                            Start HRV Experiment
+                        </button>
+                        <div class="experiment-duration">
+                            <i class="fas fa-clock"></i>
+                            ~45 minutes
+                        </div>
+                    </div>
+                </div>
+
+                <div class="experiment-card emg-card">
+                    <div class="card-header">
+                        <div class="experiment-icon">
+                            <i class="fas fa-wave-square"></i>
+                        </div>
+                        <div class="card-badge">Neuromuscular</div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Electromyography (EMG)</h3>
+                        <p class="card-description">
+                            Record and analyze muscle electrical activity. Understand electrode placement, 
+                            signal acquisition, and muscle activation patterns across different conditions.
+                        </p>
+                        <div class="card-features">
+                            <span class="feature-tag">
+                                <i class="fas fa-dumbbell"></i>
+                                Muscle Activity
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-electrodes"></i>
+                                Electrode Setup
+                            </span>
+                            <span class="feature-tag">
+                                <i class="fas fa-chart-area"></i>
+                                Force Analysis
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="experiment-btn emg-btn" onclick="openExperiment('emg')">
+                            <i class="fas fa-play"></i>
+                            Start EMG Experiment
+                        </button>
+                        <div class="experiment-duration">
+                            <i class="fas fa-clock"></i>
+                            ~35 minutes
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Information Section -->
+            <section class="info-section">
+                <div class="info-content">
+                    <h3>About Virtual Laboratory</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-flask"></i>
+                            <h4>Interactive Learning</h4>
+                            <p>Hands-on experience with virtual biomedical equipment and real-world scenarios</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-chart-bar"></i>
+                            <h4>Data Analysis</h4>
+                            <p>Learn professional signal processing and statistical analysis techniques</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-certificate"></i>
+                            <h4>Comprehensive Training</h4>
+                            <p>Complete laboratory protocols from setup to data interpretation</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h4>Accessibility</h4>
+                            <p>Access experiments from anywhere with cross-platform compatibility</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="main-footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Virtual Laboratory Hub. Advanced Biomedical Engineering Education.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js?v=1"></script>
+    <script src="api-client.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
