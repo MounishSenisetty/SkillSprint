@@ -1065,7 +1065,9 @@
     // =========================================
 
     window.nextStep = function() {
-        if (!validateCurrentStep()) {
+        const isValid = validateCurrentStep();
+        if (!isValid) {
+            focusFirstInvalidField(state.currentStep);
             return;
         }
 
@@ -1121,6 +1123,22 @@
                 return validateStep3();
             default:
                 return false;
+        }
+    }
+
+    function focusFirstInvalidField(stepNumber) {
+        const fieldsByStep = {
+            1: [elements.firstName, elements.lastName, elements.emailRegister, elements.passwordRegister, elements.confirmPassword],
+            2: [elements.institution, elements.programLevel, elements.fieldOfStudy, elements.labExperience],
+            3: [elements.learningPace, elements.termsAgreement]
+        };
+
+        const candidates = fieldsByStep[stepNumber] || [];
+        const target = candidates.find((field) => field && field.classList && field.classList.contains('error'));
+
+        if (target && typeof target.focus === 'function') {
+            target.focus();
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 
@@ -1278,8 +1296,7 @@
         
         field.classList.add('error');
         
-        const errorId = field.id + '-error';
-        const errorElement = document.getElementById(errorId);
+        const errorElement = getErrorElementForField(field);
         
         if (errorElement) {
             errorElement.textContent = message;
@@ -1291,12 +1308,27 @@
         
         field.classList.remove('error');
         
-        const errorId = field.id + '-error';
-        const errorElement = document.getElementById(errorId);
+        const errorElement = getErrorElementForField(field);
         
         if (errorElement) {
             errorElement.textContent = '';
         }
+    }
+
+    function getErrorElementForField(field) {
+        if (!field || !field.id) return null;
+
+        // Terms checkbox uses a non-standard error element id in register.html
+        if (field.id === 'terms-agreement') {
+            return document.getElementById('terms-error');
+        }
+
+        const exactMatch = document.getElementById(field.id + '-error');
+        if (exactMatch) return exactMatch;
+
+        // Fallback for dashed IDs where a legacy alias might exist.
+        const alias = field.id.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+        return document.getElementById(alias + '-error');
     }
 
     function clearError(e) {
