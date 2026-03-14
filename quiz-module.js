@@ -297,6 +297,36 @@
         }
     }
 
+    async function persistAssessment(experimentKey, assessmentType, result) {
+        try {
+            if (!result || !window.labAPI || typeof window.labAPI.submitAssessment !== 'function') {
+                return;
+            }
+
+            const attempts = Array.isArray(result.answers)
+                ? result.answers.map((item) => ({
+                      question_id: item.questionId || null,
+                      selected_label: item.selectedLabel || null,
+                      correct: Boolean(item.correct),
+                      attempt_number: 1
+                  }))
+                : [];
+
+            await window.labAPI.submitAssessment({
+                experiment_key: experimentKey,
+                assessment_type: assessmentType,
+                score: result.score,
+                total: result.total,
+                pct: result.pct,
+                time_spent_seconds: result.timeSpentSeconds || 0,
+                attempts
+            });
+        } catch (error) {
+            // Assessment persistence should not block lab UX.
+            console.warn('[QuizModule] Assessment persistence failed:', error?.message || error);
+        }
+    }
+
     // ─────────────────────────────────────────────────
     // Fallback question data (matches experiment-content.js)
     // ─────────────────────────────────────────────────
@@ -476,6 +506,7 @@
         let currentQ = 0;
         let answers = [];  // { questionId, selectedLabel, correct }
         let answered = false;
+        const quizStartedAt = Date.now();
 
         function render() {
             if (currentQ >= questions.length) {
@@ -625,7 +656,15 @@
 
             overlay.querySelector('#qm-done-btn').addEventListener('click', () => {
                 closeOverlay(overlayId);
-                if (typeof onComplete === 'function') onComplete({ score: correct, total, pct });
+                if (typeof onComplete === 'function') {
+                    onComplete({
+                        score: correct,
+                        total,
+                        pct,
+                        answers,
+                        timeSpentSeconds: Math.max(1, Math.round((Date.now() - quizStartedAt) / 1000))
+                    });
+                }
             });
         }
 
@@ -660,6 +699,7 @@
             onComplete: (result) => {
                 if (result) {
                     sessionStorage.setItem(`pretest_score_${experimentKey}`, result.pct);
+                    persistAssessment(experimentKey, 'pretest', result);
                 }
                 if (typeof onComplete === 'function') onComplete(result);
             }
@@ -690,7 +730,12 @@
             questions,
             type: 'post',
             preTestScore,
-            onComplete
+            onComplete: (result) => {
+                if (result) {
+                    persistAssessment(experimentKey, 'posttest', result);
+                }
+                if (typeof onComplete === 'function') onComplete(result);
+            }
         });
     }
 
@@ -716,7 +761,12 @@
             questions: [question],
             type: 'popup',
             preTestScore: null,
-            onComplete
+            onComplete: (result) => {
+                if (result) {
+                    persistAssessment(experimentKey, 'popup', result);
+                }
+                if (typeof onComplete === 'function') onComplete(result);
+            }
         });
     }
 

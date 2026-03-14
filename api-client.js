@@ -70,7 +70,7 @@ class LabAPIClient {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(errorData.error || errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
@@ -285,7 +285,10 @@ class LabAPIClient {
     }
 
     // Enhanced interaction tracking methods
-    trackClick(element, additionalData = {}) {
+    trackClick(element, additionalData = {}, eventObj = null) {
+        const clickX = typeof eventObj?.clientX === 'number' ? eventObj.clientX : null;
+        const clickY = typeof eventObj?.clientY === 'number' ? eventObj.clientY : null;
+
         this.logInteraction({
             interaction_type: 'click',
             page_section: element.id || element.className || 'unknown',
@@ -302,8 +305,8 @@ class LabAPIClient {
                 user_agent: navigator.userAgent
             },
             mouse_coordinates: {
-                x: event.clientX,
-                y: event.clientY
+                x: clickX,
+                y: clickY
             },
             viewport_size: {
                 width: window.innerWidth,
@@ -482,6 +485,17 @@ class LabAPIClient {
             return { valid: false };
         }
     }
+
+    async getStudentDashboard() {
+        return this.makeRequest('/lab/student/dashboard');
+    }
+
+    async submitAssessment(payload) {
+        return this.makeRequest('/lab/assessments/submit', {
+            method: 'POST',
+            body: JSON.stringify(payload || {})
+        });
+    }
 }
 
 // =========================================
@@ -512,7 +526,7 @@ document.addEventListener('click', (event) => {
     // Only track clicks on buttons, links, and interactive elements
     if (element.matches('button, a, .clickable, [data-track="true"]')) {
         if (labAPI.isAuthenticated()) {
-            labAPI.trackClick(element);
+            labAPI.trackClick(element, {}, event);
         }
     }
 });

@@ -64,7 +64,7 @@
         const role = String(user?.role || '').toLowerCase();
         if (role === 'teacher') return 'teacher-dashboard.html';
         if (role === 'admin') return 'admin-dashboard.html';
-        return 'index.html';
+        return 'user-dashboard.html';
     }
 
     function checkAuthStatus() {

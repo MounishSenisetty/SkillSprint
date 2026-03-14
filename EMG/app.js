@@ -27,7 +27,12 @@
         signalBuffer: [],
         signalOffset: 0,
         signalSpeed: 0.5,
-        completedSteps: new Set([0])
+        completedSteps: new Set([0]),
+        assessmentsShown: {
+            pre: false,
+            popup: false,
+            post: false
+        }
     };
 
     // Muscle information database
@@ -96,6 +101,7 @@
     window.addEventListener('DOMContentLoaded', init);
 
     function init() {
+        enforceAuthForLab();
         simulateLoading();
         setupEventListeners();
         setupGlossary();
@@ -104,6 +110,49 @@
         setupStepNavigation();
         setupConditionCards();
         setupSignalSpeedControl();
+    }
+
+    function enforceAuthForLab() {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('lab_auth_token');
+        if (!token) {
+            window.location.href = '../login.html';
+        }
+    }
+
+    function runPreTest(callback) {
+        if (!window.QuizModule || typeof window.QuizModule.startPreTest !== 'function') {
+            if (typeof callback === 'function') callback();
+            return;
+        }
+
+        window.QuizModule.startPreTest('emg', () => {
+            state.assessmentsShown.pre = true;
+            if (typeof callback === 'function') callback();
+        });
+    }
+
+    function runPopupQuestion(callback) {
+        if (!window.QuizModule || typeof window.QuizModule.showPopupQuestion !== 'function') {
+            if (typeof callback === 'function') callback();
+            return;
+        }
+
+        window.QuizModule.showPopupQuestion('emg', () => {
+            state.assessmentsShown.popup = true;
+            if (typeof callback === 'function') callback();
+        });
+    }
+
+    function runPostTest(callback) {
+        if (!window.QuizModule || typeof window.QuizModule.startPostTest !== 'function') {
+            if (typeof callback === 'function') callback();
+            return;
+        }
+
+        window.QuizModule.startPostTest('emg', () => {
+            state.assessmentsShown.post = true;
+            if (typeof callback === 'function') callback();
+        });
     }
 
     function simulateLoading() {
@@ -420,6 +469,10 @@
     function setupEventListeners() {
         // Start button
         document.getElementById('start-lab-btn').addEventListener('click', () => {
+            if (!state.assessmentsShown.pre) {
+                runPreTest(() => goToStep(1));
+                return;
+            }
             goToStep(1);
         });
 
@@ -479,6 +532,10 @@
         document.getElementById('stop-btn').addEventListener('click', stopRecording);
         document.getElementById('save-btn').addEventListener('click', saveTrial);
         document.getElementById('rec-next-btn').addEventListener('click', () => {
+            if (!state.assessmentsShown.popup) {
+                runPopupQuestion(() => goToStep(5));
+                return;
+            }
             goToStep(5);
         });
 
@@ -515,6 +572,30 @@
         document.getElementById('close-glossary').addEventListener('click', () => {
             document.getElementById('glossary-modal').classList.add('hidden');
         });
+
+        const flashcardBtn = document.getElementById('flashcard-btn');
+        if (flashcardBtn) {
+            flashcardBtn.addEventListener('click', () => {
+                if (window.QuizModule?.showFlashcards) {
+                    window.QuizModule.showFlashcards('emg');
+                }
+            });
+        }
+
+        const pretestBtn = document.getElementById('pretest-btn');
+        if (pretestBtn) {
+            pretestBtn.addEventListener('click', () => runPreTest());
+        }
+
+        const popupBtn = document.getElementById('popup-quiz-btn');
+        if (popupBtn) {
+            popupBtn.addEventListener('click', () => runPopupQuestion());
+        }
+
+        const posttestBtn = document.getElementById('posttest-btn');
+        if (posttestBtn) {
+            posttestBtn.addEventListener('click', () => runPostTest());
+        }
     }
 
     // ======== MUAP ANIMATION (Intro) ========

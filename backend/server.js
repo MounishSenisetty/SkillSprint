@@ -89,6 +89,14 @@ function buildAdaptiveFeedback(stats = []) {
     };
 }
 
+function normalizeAssessmentType(value) {
+    const type = String(value || '').trim().toLowerCase();
+    if (type === 'pretest' || type === 'pre-test') return 'pretest';
+    if (type === 'posttest' || type === 'post-test') return 'posttest';
+    if (type === 'popup' || type === 'popup_question' || type === 'popup-question') return 'popup';
+    return 'quiz';
+}
+
 function validateDbConfig() {
     if (useConnectionString) {
         try {
@@ -980,6 +988,267 @@ app.get('/api/v1/lab/adaptive/feedback', authenticateToken, async (req, res) => 
     } catch (err) {
         console.error('❌ Adaptive feedback error:', err);
         res.status(500).json({ error: 'Failed to generate adaptive feedback' });
+    }
+});
+
+app.get('/api/v1/lab/student/dashboard', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const profileResult = await pool.query(
+            `SELECT id, email, first_name, last_name, institution, program_level, field_of_study, role, created_at
+             FROM users
+             WHERE id = $1
+             LIMIT 1`,
+            [userId]
+        );
+
+        if (profileResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const summaryResult = await pool.query(
+            `SELECT
+                COUNT(*) AS total_experiments,
+                COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed_experiments,
+                COALESCE(AVG(duration_minutes), 0) AS avg_duration_minutes
+             FROM experiments
+             WHERE user_id = $1`,
+            [userId]
+        );
+
+        const masteryResult = await pool.query(
+            `SELECT
+                COALESCE(AVG(mastery_score), 0) AS avg_mastery,
+                COUNT(*) AS concept_count
+             FROM student_concept_mastery
+             WHERE user_id = $1`,
+            [userId]
+        );
+
+        const recentAssessments = await pool.query(
+            `SELECT
+                asess.id,
+                asess.assessment_type,
+                asess.total_score,
+                asess.max_score,
+                asess.accuracy_percentage,
+                asess.time_spent_seconds,
+                asess.completed_at,
+                ec.experiment_key,
+                ec.experiment_name
+             FROM assessment_sessions asess
+             LEFT JOIN experiment_catalog ec ON ec.id = asess.experiment_catalog_id
+             WHERE asess.user_id = $1
+             ORDER BY asess.completed_at DESC NULLS LAST, asess.id DESC
+             LIMIT 12`,
+            [userId]
+        );
+
+        const moduleProgress = await pool.query(
+            `SELECT
+                smp.id,
+                smp.status,
+                smp.progress_percentage,
+                smp.time_spent_seconds,
+                smp.attempt_count,
+                smp.last_accessed_at,
+                smp.completed_at,
+                lm.module_key,
+                lm.module_title,
+                ec.experiment_key,
+                ec.experiment_name
+             FROM student_module_progress smp
+             JOIN learning_modules lm ON lm.id = smp.module_id
+             LEFT JOIN experiment_catalog ec ON ec.id = lm.experiment_catalog_id
+             WHERE smp.user_id = $1
+             ORDER BY smp.updated_at DESC NULLS LAST, smp.id DESC
+             LIMIT 20`,
+            [userId]
+        );
+
+        const summary = summaryResult.rows[0] || {};
+        const mastery = masteryResult.rows[0] || {};
+
+        res.json({
+            user: profileResult.rows[0],
+            summary: {
+                total_experiments: Number(summary.total_experiments || 0),
+                completed_experiments: Number(summary.completed_experiments || 0),
+                avg_duration_minutes: Number(summary.avg_duration_minutes || 0),
+                avg_mastery_score: Number(mastery.avg_mastery || 0),
+                tracked_concepts: Number(mastery.concept_count || 0)
+            },
+            assessments: recentAssessments.rows,
+            module_progress: moduleProgress.rows,
+            generated_at: new Date().toISOString()
+        });
+    } catch (err) {
+        console.error('❌ Student dashboard error:', err);
+        res.status(500).json({ error: 'Failed to load student dashboard' });
+    }
+});
+
+app.post('/api/v1/lab/assessments/submit', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const {
+            experiment_key,
+            assessment_type,
+            score,
+            total,
+            pct,
+            time_spent_seconds,
+            module_key,
+            attempts
+        } = req.body || {};
+
+        const normalizedType = normalizeAssessmentType(assessment_type);
+        const normalizedScore = Number(score || 0);
+        const normalizedTotal = Number(total || 0);
+        const normalizedPct = Number.isFinite(Number(pct)) ? Number(pct) : (normalizedTotal > 0 ? (normalizedScore / normalizedTotal) * 100 : 0);
+
+        if (!experiment_key) {
+            return res.status(400).json({ error: 'experiment_key is required' });
+        }
+
+        const catalogResult = await pool.query(
+            `SELECT id, experiment_key FROM experiment_catalog WHERE experiment_key = $1 LIMIT 1`,
+            [experiment_key]
+        );
+
+        if (catalogResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Experiment catalog not found' });
+        }
+
+        const catalogId = catalogResult.rows[0].id;
+
+        const assessmentResult = await pool.query(
+            `INSERT INTO assessment_sessions
+             (user_id, experiment_catalog_id, assessment_type, started_at, completed_at, total_score, max_score, accuracy_percentage, time_spent_seconds, knowledge_level_inferred)
+             VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $4, $5, $6, $7, $8)
+             RETURNING id, assessment_type, total_score, max_score, accuracy_percentage, completed_at`,
+            [
+                userId,
+                catalogId,
+                normalizedType,
+                normalizedScore,
+                normalizedTotal,
+                normalizedPct,
+                Number(time_spent_seconds || 0),
+                normalizedPct >= 80 ? 'high' : (normalizedPct >= 60 ? 'medium' : 'developing')
+            ]
+        );
+
+        const assessment = assessmentResult.rows[0];
+
+        if (Array.isArray(attempts) && attempts.length > 0) {
+            for (const attempt of attempts) {
+                const questionId = Number(attempt.question_id || attempt.questionId || 0);
+                if (!questionId) continue;
+
+                await pool.query(
+                    `INSERT INTO student_question_attempts
+                     (user_id, question_id, attempt_number, submitted_answer, is_correct, score_awarded, response_time_seconds, hint_used, attempt_context)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                    [
+                        userId,
+                        questionId,
+                        Number(attempt.attempt_number || 1),
+                        JSON.stringify({ selected_label: attempt.selected_label || attempt.selectedLabel || null }),
+                        Boolean(attempt.correct),
+                        Boolean(attempt.correct) ? 1 : 0,
+                        Number(attempt.response_time_seconds || 0),
+                        false,
+                        normalizedType
+                    ]
+                );
+            }
+        }
+
+        if (module_key) {
+            const moduleResult = await pool.query(
+                `SELECT id FROM learning_modules WHERE module_key = $1 LIMIT 1`,
+                [module_key]
+            );
+
+            if (moduleResult.rows.length > 0) {
+                const moduleId = moduleResult.rows[0].id;
+                const status = normalizedType === 'posttest' && normalizedPct >= 60 ? 'completed' : 'in_progress';
+                const progressValue = Math.max(0, Math.min(100, normalizedPct));
+                const durationSeconds = Number(time_spent_seconds || 0);
+                const existingProgress = await pool.query(
+                    `SELECT id, progress_percentage, time_spent_seconds, attempt_count, completed_at
+                     FROM student_module_progress
+                     WHERE user_id = $1 AND module_id = $2
+                     LIMIT 1`,
+                    [userId, moduleId]
+                );
+
+                if (existingProgress.rows.length > 0) {
+                    const current = existingProgress.rows[0];
+                    await pool.query(
+                        `UPDATE student_module_progress
+                         SET status = $1,
+                             progress_percentage = $2,
+                             time_spent_seconds = $3,
+                             attempt_count = $4,
+                             last_accessed_at = CURRENT_TIMESTAMP,
+                             completed_at = $5,
+                             updated_at = CURRENT_TIMESTAMP
+                         WHERE id = $6`,
+                        [
+                            status,
+                            Math.max(Number(current.progress_percentage || 0), progressValue),
+                            Number(current.time_spent_seconds || 0) + durationSeconds,
+                            Number(current.attempt_count || 0) + 1,
+                            status === 'completed' ? (current.completed_at || new Date()) : current.completed_at,
+                            current.id
+                        ]
+                    );
+                } else {
+                    await pool.query(
+                        `INSERT INTO student_module_progress
+                         (user_id, module_id, status, progress_percentage, time_spent_seconds, attempt_count, last_accessed_at, completed_at)
+                         VALUES ($1, $2, $3, $4, $5, 1, CURRENT_TIMESTAMP, $6)`,
+                        [
+                            userId,
+                            moduleId,
+                            status,
+                            progressValue,
+                            durationSeconds,
+                            status === 'completed' ? new Date() : null
+                        ]
+                    );
+                }
+            }
+        }
+
+        if (normalizedType === 'pretest' || normalizedType === 'posttest') {
+            const field = normalizedType === 'pretest' ? 'pretest_score' : 'posttest_score';
+            await pool.query(
+                `UPDATE experiments
+                 SET ${field} = $1
+                 WHERE id = (
+                    SELECT id
+                    FROM experiments
+                    WHERE user_id = $2
+                      AND experiment_catalog_id = $3
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                 )`,
+                [normalizedPct, userId, catalogId]
+            );
+        }
+
+        res.status(201).json({
+            status: 'saved',
+            assessment,
+            message: 'Assessment and progress stored successfully'
+        });
+    } catch (err) {
+        console.error('❌ Assessment submit error:', err);
+        res.status(500).json({ error: 'Failed to store assessment progress' });
     }
 });
 

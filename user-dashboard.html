@@ -3,426 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management Dashboard — Virtual Laboratory Hub</title>
+    <title>Student Dashboard - Virtual Lab</title>
     <link rel="stylesheet" href="auth-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f8f9fa;
-            min-height: 100vh;
-        }
-        
-        .dashboard-header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .dashboard-header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            text-align: center;
-            position: relative;
-        }
-        
-        .stat-card .icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.8;
-        }
-        
-        .stat-card.demo .icon { color: #3498db; }
-        .stat-card.registered .icon { color: #27ae60; }
-        .stat-card.total .icon { color: #9b59b6; }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #2c3e50;
-        }
-        
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-        }
-        
-        .users-section {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .section-header {
-            background: #34495e;
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .users-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .users-table th,
-        .users-table td {
-            padding: 15px 20px;
-            text-align: left;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        
-        .users-table th {
-            background: #f8f9fa;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        
-        .users-table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .demo-badge {
-            background: #3498db;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #7f8c8d;
-        }
-        
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 15px;
-            }
-            
-            .users-table {
-                font-size: 0.9rem;
-            }
-            
-            .users-table th,
-            .users-table td {
-                padding: 10px 15px;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
+        body { background: #f4f7fb; }
+        .page { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 4px 16px rgba(0,0,0,.08); margin-bottom: 16px; }
+        .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+        .kpi-label { color: #6b7280; font-size: 13px; }
+        .kpi-value { font-size: 28px; font-weight: 700; color: #111827; }
+        .btn { border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-secondary { background: #e5e7eb; color: #111827; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 14px; }
+        .muted { color: #6b7280; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-in_progress { background: #dbeafe; color: #1d4ed8; }
+        .status-not_started { background: #f3f4f6; color: #374151; }
+        .actions { display: flex; gap: 8px; }
+        @media (max-width: 960px) {
+            .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1><i class="fas fa-users-cog"></i> User Management Dashboard</h1>
-            <p>Monitor and manage Virtual Laboratory user accounts</p>
+<div class="page">
+    <div class="card top">
+        <div>
+            <h2 id="welcome">Student Dashboard</h2>
+            <p id="profile" class="muted">Loading profile...</p>
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-card demo">
-                <div class="icon">
-                    <i class="fas fa-flask"></i>
-                </div>
-                <div class="stat-value" id="demo-count">2</div>
-                <div class="stat-label">Demo Accounts</div>
-            </div>
-            
-            <div class="stat-card registered">
-                <div class="icon">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
-                <div class="stat-value" id="registered-count">0</div>
-                <div class="stat-label">Registered Users</div>
-            </div>
-            
-            <div class="stat-card total">
-                <div class="icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-value" id="total-count">2</div>
-                <div class="stat-label">Total Users</div>
-            </div>
-        </div>
-
-        <div class="users-section">
-            <div class="section-header">
-                <h2><i class="fas fa-table"></i> All Users</h2>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="refreshData()">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button>
-                    <button class="btn btn-success" onclick="exportUsers()">
-                        <i class="fas fa-download"></i>
-                        Export
-                    </button>
-                    <button class="btn btn-danger" onclick="clearAllData()">
-                        <i class="fas fa-trash-alt"></i>
-                        Clear All
-                    </button>
-                    <a href="login.html" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Login
-                    </a>
-                </div>
-            </div>
-            
-            <div id="users-content">
-                <div class="empty-state">
-                    <i class="fas fa-spinner fa-pulse"></i>
-                    <h3>Loading user data...</h3>
-                </div>
-            </div>
+        <div class="actions">
+            <button class="btn btn-primary" id="open-lab-btn">Open Lab</button>
+            <button class="btn btn-primary" id="refresh-btn">Refresh</button>
+            <button class="btn btn-secondary" id="logout-btn">Logout</button>
         </div>
     </div>
 
-    <script>
-        // User data management
-        function getUserData() {
-            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-            const demoUsers = [
-                {
-                    email: 'demo@lab.edu',
-                    firstName: 'Demo',
-                    lastName: 'User',
-                    name: 'Demo User',
-                    institution: 'Virtual Lab University',
-                    programLevel: 'undergraduate',
-                    fieldOfStudy: 'biomedical-engineering',
-                    registeredAt: '2024-01-01T00:00:00.000Z',
-                    isDemo: true
-                },
-                {
-                    email: 'student@university.edu',
-                    firstName: 'Student',
-                    lastName: 'Demo',
-                    name: 'Student Demo',
-                    institution: 'Demo University',
-                    programLevel: 'graduate',
-                    fieldOfStudy: 'biomedical-engineering',
-                    registeredAt: '2024-01-01T00:00:00.000Z',
-                    isDemo: true
-                }
-            ];
-            
-            return {
-                registered: registeredUsers,
-                demo: demoUsers,
-                all: [...demoUsers, ...registeredUsers]
-            };
+    <div class="grid">
+        <div class="card"><div class="kpi-label">Experiments</div><div class="kpi-value" id="k-total">0</div></div>
+        <div class="card"><div class="kpi-label">Completed</div><div class="kpi-value" id="k-completed">0</div></div>
+        <div class="card"><div class="kpi-label">Avg Mastery</div><div class="kpi-value" id="k-mastery">0%</div></div>
+        <div class="card"><div class="kpi-label">Avg Duration</div><div class="kpi-value" id="k-duration">0m</div></div>
+    </div>
+
+    <div class="card">
+        <h3>Recent Assessments</h3>
+        <p id="assess-empty" class="muted">Loading assessments...</p>
+        <table id="assess-table" style="display:none;">
+            <thead>
+            <tr>
+                <th>Experiment</th>
+                <th>Type</th>
+                <th>Score</th>
+                <th>Accuracy</th>
+                <th>Completed</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Module Progress</h3>
+        <p id="progress-empty" class="muted">Loading progress...</p>
+        <table id="progress-table" style="display:none;">
+            <thead>
+            <tr>
+                <th>Experiment</th>
+                <th>Module</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Attempts</th>
+                <th>Last Access</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="api-client.js"></script>
+<script>
+(function() {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('lab_auth_token');
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    function fmtDate(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString();
+    }
+
+    function setProfile(user) {
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Student';
+        document.getElementById('welcome').textContent = `Welcome, ${fullName}`;
+        document.getElementById('profile').textContent = `${user.email || ''} | ${user.institution || 'Institution not set'}`;
+    }
+
+    function setKpis(summary) {
+        document.getElementById('k-total').textContent = summary.total_experiments || 0;
+        document.getElementById('k-completed').textContent = summary.completed_experiments || 0;
+        document.getElementById('k-mastery').textContent = `${Math.round(Number(summary.avg_mastery_score || 0))}%`;
+        document.getElementById('k-duration').textContent = `${Math.round(Number(summary.avg_duration_minutes || 0))}m`;
+    }
+
+    function renderAssessments(items) {
+        const table = document.getElementById('assess-table');
+        const empty = document.getElementById('assess-empty');
+        const tbody = table.querySelector('tbody');
+
+        tbody.innerHTML = '';
+        if (!Array.isArray(items) || items.length === 0) {
+            empty.textContent = 'No assessment attempts yet.';
+            table.style.display = 'none';
+            return;
         }
-        
-        function updateStats() {
-            const data = getUserData();
-            
-            document.getElementById('demo-count').textContent = data.demo.length;
-            document.getElementById('registered-count').textContent = data.registered.length;
-            document.getElementById('total-count').textContent = data.all.length;
+
+        items.forEach((item) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.experiment_name || item.experiment_key || '-'}</td>
+                <td>${item.assessment_type || '-'}</td>
+                <td>${Number(item.total_score || 0)} / ${Number(item.max_score || 0)}</td>
+                <td>${Math.round(Number(item.accuracy_percentage || 0))}%</td>
+                <td>${fmtDate(item.completed_at)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        empty.textContent = '';
+        table.style.display = 'table';
+    }
+
+    function renderProgress(items) {
+        const table = document.getElementById('progress-table');
+        const empty = document.getElementById('progress-empty');
+        const tbody = table.querySelector('tbody');
+
+        tbody.innerHTML = '';
+        if (!Array.isArray(items) || items.length === 0) {
+            empty.textContent = 'No module progress data yet.';
+            table.style.display = 'none';
+            return;
         }
-        
-        function renderUsersTable() {
-            const data = getUserData();
-            const container = document.getElementById('users-content');
-            
-            if (data.all.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-user-slash"></i>
-                        <h3>No users found</h3>
-                        <p>No registered users or demo accounts available.</p>
-                    </div>
-                `;
+
+        items.forEach((item) => {
+            const status = String(item.status || 'not_started');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.experiment_name || item.experiment_key || '-'}</td>
+                <td>${item.module_title || item.module_key || '-'}</td>
+                <td><span class="status status-${status}">${status.replace('_', ' ')}</span></td>
+                <td>${Math.round(Number(item.progress_percentage || 0))}%</td>
+                <td>${Number(item.attempt_count || 0)}</td>
+                <td>${fmtDate(item.last_accessed_at)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        empty.textContent = '';
+        table.style.display = 'table';
+    }
+
+    async function loadDashboard() {
+        try {
+            const me = await window.labAPI.getProfile();
+            const role = String(me?.user?.role || '').toLowerCase();
+            if (role === 'teacher') {
+                window.location.href = 'teacher-dashboard.html';
                 return;
             }
-            
-            const tableHTML = `
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Institution</th>
-                            <th>Program Level</th>
-                            <th>Registration Date</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.all.map(user => `
-                            <tr>
-                                <td><strong>${user.firstName} ${user.lastName}</strong></td>
-                                <td>${user.email}</td>
-                                <td>${user.institution || 'N/A'}</td>
-                                <td>${user.programLevel || 'N/A'}</td>
-                                <td>${new Date(user.registeredAt).toLocaleDateString()}</td>
-                                <td>${user.isDemo ? '<span class="demo-badge">Demo</span>' : 'Registered'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            
-            container.innerHTML = tableHTML;
-        }
-        
-        function refreshData() {
-            updateStats();
-            renderUsersTable();
-            
-            // Show brief success message
-            const btn = event.target.closest('button');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i> Refreshed!';
-            btn.style.background = '#27ae60';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.background = '#3498db';
-            }, 1500);
-        }
-        
-        function exportUsers() {
-            const data = getUserData();
-            const csvContent = [
-                ['Name', 'Email', 'Institution', 'Program Level', 'Registration Date', 'Type'].join(','),
-                ...data.all.map(user => [
-                    `"${user.firstName} ${user.lastName}"`,
-                    user.email,
-                    `"${user.institution || 'N/A'}"`,
-                    user.programLevel || 'N/A',
-                    new Date(user.registeredAt).toLocaleDateString(),
-                    user.isDemo ? 'Demo' : 'Registered'
-                ].join(','))
-            ].join('\n');
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = `virtual-lab-users-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            
-            window.URL.revokeObjectURL(url);
-        }
-        
-        function clearAllData() {
-            if (confirm('This will permanently delete all registered user accounts. Demo accounts will remain. Continue?')) {
-                localStorage.removeItem('registeredUsers');
-                localStorage.removeItem('currentUser');
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('sessionInfo');
-                localStorage.removeItem('authExpiry');
-                localStorage.removeItem('totalRegisteredUsers');
-                
-                refreshData();
-                alert('All registered user data has been cleared.');
+            if (role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+                return;
             }
+
+            const data = await window.labAPI.getStudentDashboard();
+            setProfile(data.user || {});
+            setKpis(data.summary || {});
+            renderAssessments(data.assessments || []);
+            renderProgress(data.module_progress || []);
+        } catch (err) {
+            document.getElementById('profile').textContent = `Failed to load dashboard: ${err.message}`;
+            document.getElementById('assess-empty').textContent = 'Unable to load assessments.';
+            document.getElementById('progress-empty').textContent = 'Unable to load progress.';
         }
-        
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            updateStats();
-            renderUsersTable();
-            
-            // Auto-refresh every 30 seconds
-            setInterval(refreshData, 30000);
-        });
-        
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'r':
-                        e.preventDefault();
-                        refreshData();
-                        break;
-                    case 'e':
-                        e.preventDefault();
-                        exportUsers();
-                        break;
-                }
-            }
-        });
-    </script>
+    }
+
+    document.getElementById('open-lab-btn').addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', loadDashboard);
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        window.labAPI.logout();
+        window.location.href = 'login.html';
+    });
+
+    loadDashboard();
+})();
+</script>
 </body>
 </html>

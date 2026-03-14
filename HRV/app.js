@@ -12,7 +12,12 @@ const state = {
     recordedData: null,
     rrIntervals: [],
     analysisData: null,
-    engine: null
+    engine: null,
+    assessmentsShown: {
+        pre: false,
+        popup: false,
+        post: false
+    }
 };
 
 // Equipment Data
@@ -155,6 +160,8 @@ function simulateLoading() {
 }
 
 function initializeApp() {
+    enforceAuthForLab();
+
     // Initialize the HRV Signal Engine
     state.engine = new HRVSignalEngine();
     
@@ -178,6 +185,9 @@ function initializeApp() {
     
     // Setup Glossary Modal
     setupGlossary();
+
+    // Setup pre/post/popup/flashcard actions
+    setupAssessmentButtons();
     
     // Initialize Canvas Displays
     initializeCanvases();
@@ -188,6 +198,75 @@ function initializeApp() {
     console.log('HRV Virtual Lab initialized successfully');
 }
 
+function enforceAuthForLab() {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('lab_auth_token');
+    if (!token) {
+        window.location.href = '../login.html';
+    }
+}
+
+function runPreTest(callback) {
+    if (!window.QuizModule || typeof window.QuizModule.startPreTest !== 'function') {
+        if (typeof callback === 'function') callback();
+        return;
+    }
+
+    window.QuizModule.startPreTest('hrv', () => {
+        state.assessmentsShown.pre = true;
+        if (typeof callback === 'function') callback();
+    });
+}
+
+function runPopupQuestion(callback) {
+    if (!window.QuizModule || typeof window.QuizModule.showPopupQuestion !== 'function') {
+        if (typeof callback === 'function') callback();
+        return;
+    }
+
+    window.QuizModule.showPopupQuestion('hrv', () => {
+        state.assessmentsShown.popup = true;
+        if (typeof callback === 'function') callback();
+    });
+}
+
+function runPostTest(callback) {
+    if (!window.QuizModule || typeof window.QuizModule.startPostTest !== 'function') {
+        if (typeof callback === 'function') callback();
+        return;
+    }
+
+    window.QuizModule.startPostTest('hrv', () => {
+        state.assessmentsShown.post = true;
+        if (typeof callback === 'function') callback();
+    });
+}
+
+function setupAssessmentButtons() {
+    const flashcardBtn = document.getElementById('flashcard-btn');
+    if (flashcardBtn) {
+        flashcardBtn.addEventListener('click', () => {
+            if (window.QuizModule?.showFlashcards) {
+                window.QuizModule.showFlashcards('hrv');
+            }
+        });
+    }
+
+    const pretestBtn = document.getElementById('pretest-btn');
+    if (pretestBtn) {
+        pretestBtn.addEventListener('click', () => runPreTest());
+    }
+
+    const popupBtn = document.getElementById('popup-quiz-btn');
+    if (popupBtn) {
+        popupBtn.addEventListener('click', () => runPopupQuestion());
+    }
+
+    const posttestBtn = document.getElementById('posttest-btn');
+    if (posttestBtn) {
+        posttestBtn.addEventListener('click', () => runPostTest());
+    }
+}
+
 /* =========================================
    Step Button Handlers
    ========================================= */
@@ -196,6 +275,14 @@ function setupStepButtons() {
     const startLabBtn = document.getElementById('start-lab-btn');
     if (startLabBtn) {
         startLabBtn.addEventListener('click', () => {
+            if (!state.assessmentsShown.pre) {
+                runPreTest(() => {
+                    state.completedSteps.add(0);
+                    navigateToStep(1);
+                });
+                return;
+            }
+
             state.completedSteps.add(0);
             navigateToStep(1);
         });
@@ -214,6 +301,14 @@ function setupStepButtons() {
     const recordingNextBtn = document.getElementById('recording-next-btn');
     if (recordingNextBtn) {
         recordingNextBtn.addEventListener('click', () => {
+            if (!state.assessmentsShown.popup) {
+                runPopupQuestion(() => {
+                    state.completedSteps.add(2);
+                    navigateToStep(3);
+                });
+                return;
+            }
+
             state.completedSteps.add(2);
             navigateToStep(3);
         });
@@ -223,6 +318,14 @@ function setupStepButtons() {
     const analysisNextBtn = document.getElementById('analysis-next-btn');
     if (analysisNextBtn) {
         analysisNextBtn.addEventListener('click', () => {
+            if (!state.assessmentsShown.post) {
+                runPostTest(() => {
+                    state.completedSteps.add(3);
+                    navigateToStep(4);
+                });
+                return;
+            }
+
             state.completedSteps.add(3);
             navigateToStep(4);
         });
