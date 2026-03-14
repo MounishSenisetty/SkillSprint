@@ -1149,16 +1149,37 @@ app.use((err, req, res, next) => {
 // =========================================
 
 async function startServer() {
-    if (autoInitDatabase) {
-        console.log('🔄 AUTO_INIT_DB enabled. Verifying schema before startup...');
-        await initializeDatabase();
-    }
-
     app.listen(PORT, () => {
         console.log('🚀 Virtual Lab Backend Server running on port', PORT);
         console.log('📡 API Base URL:', `/api/v1 on port ${PORT}`);
         console.log('🌐 Static frontend root:', STATIC_ROOT);
     });
+
+    if (autoInitDatabase) {
+        // Do not block HTTP startup on DB bootstrapping; Render health checks need the server online.
+        const maxAttempts = Number(process.env.AUTO_INIT_DB_RETRIES || 5);
+        const retryDelayMs = Number(process.env.AUTO_INIT_DB_RETRY_DELAY_MS || 15000);
+
+        let attempt = 0;
+        const runInit = async () => {
+            attempt += 1;
+            try {
+                console.log(`🔄 AUTO_INIT_DB enabled. Running database initialization (attempt ${attempt}/${maxAttempts})...`);
+                await initializeDatabase();
+                console.log('✅ AUTO_INIT_DB finished successfully.');
+            } catch (err) {
+                console.error(`❌ AUTO_INIT_DB failed on attempt ${attempt}:`, err.message || err);
+                if (attempt < maxAttempts) {
+                    console.log(`⏳ Retrying database initialization in ${retryDelayMs}ms...`);
+                    setTimeout(runInit, retryDelayMs);
+                } else {
+                    console.error('⚠️ AUTO_INIT_DB exhausted retries. Server remains up; retry manually with `npm run init-db` in backend.');
+                }
+            }
+        };
+
+        setTimeout(runInit, 0);
+    }
 }
 
 if (require.main === module) {
